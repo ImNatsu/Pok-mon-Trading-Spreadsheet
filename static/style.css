@@ -295,7 +295,7 @@ td.adamant ~ td.spa, td.jolly ~ td.spa, td.impish ~ td.spa, td.careful ~ td.spa,
 td.naive ~ td.spd, td.rash ~ td.spd, td.naughty  ~ td.spd,
 td.brave ~ td.spe, td.quiet ~ td.spe, td.sassy ~ td.spe, td.relaxed ~ td.spe { color: #0000d0; }
 
-tr.hidden-ability .ability { font-style: bold; }
+tr.hidden-ability .ability { font-weight: bold; }
 
 td.rows2 .item-sprite.row1,
 td.rows3 .item-sprite.row1,
