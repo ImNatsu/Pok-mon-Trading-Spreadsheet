@@ -2,15 +2,7 @@
 // ID of the Google spreadsheet
 // ***********************************************************************************
 // Make sure your spreadsheet is published (File > Publish to the web…)
-var spreadsheetId = "1oXDFMmbf5pAk8ZTPWirmgR5MU1X3vEVtqdbg_RgxZE8";
-
-// ***********************************************************************************
-// Position of Breedables, Shinies and Wants worksheet
-// ***********************************************************************************
-// If you don't have one worksheet, set the value to -1 to disable it
-var breedablesWorksheet = 1;
-var shiniesWorksheet = 2;
-var wantsWorksheet = 3;
+var spreadsheetId = "1oXAmhbkKjkT3qQLlTTKEl5FJrB0A1sX7g2lcJIlS7xA";
 
 // ***********************************************************************************
 // Your FC and IGN
