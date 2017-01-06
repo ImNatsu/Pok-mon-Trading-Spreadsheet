@@ -168,6 +168,7 @@ const ALOLAN_HIDDEN_ABILITIES = {
     "Harvest": [103],
     "Rock Head": [105]
 };
+const TAB_NAMES = { "FT": "For Trade", "LF": "Looking For", "NFT": "Not For Trade", "?": "Other" };
 // Stat Attributes object, used for IVs & EVs
 var StatAttributes = function() {
     this.hp  = 0;
@@ -311,7 +312,7 @@ function getModelUrl(dexNo, spriteClass, gender, isShiny) {
         modelUrl += "xy";
     }
     modelUrl += "/sprites/animados" + (isShiny ? "-shiny" : '') + "/" + spriteClass
-    if (POKEMON_WITH_GENDER_DIFFERENCES.indexOf(dexNo) > -1) {
+    if (POKEMON_WITH_GENDER_DIFFERENCES.indexOf(dexNo) > -1 && spriteClass.indexOf("-alola") == -1) {
         if (gender == "F") {
             modelUrl += dexNo == 29 ? "_f" : "-f";
         } else {
@@ -383,6 +384,9 @@ function filterPokemon() {
     // show Pokémon that have at least one class of each array (generations, balls, ratios)
     $("tbody tr").each(function() {
         var $this = $(this);
+        var name = $this.find(".name").text().toLowerCase();
+        var query = $("#search-bar").val().toLowerCase();
+        if (name.indexOf(query) == -1) return;
         if (showOnlyBabyPokemon && !$this.hasClass("baby")) return;
         if (showOnlyPokemonWithHiddenAbility && !$this.hasClass("hidden-ability")) return;
         if (showOnlyShinyPokemon && !$this.hasClass("shiny")) return;
@@ -473,18 +477,23 @@ $(document).ready(function() {
         // add button links to other tabs
         $.getJSON(getSpreadsheetUrl(spreadsheetId), function(data) {
             var entry = data.feed.entry;
+            var tabs = { "FT": "", "LF": "", "NFT": "", "?": "" };
             $(entry).each(function(index){
                 var title = getValue(this.title);
                 var thisId = index + 1;
-                var $parent;
-                if (title.startsWith("LF:")) {
-                    $parent = $("#looking-for");
-                } else if (title.startsWith("FT:")) {
-                    $parent = $("#for-trade");
+                var tab = "<li" + (thisId == worksheetId ? " class=\"current\"" : '') + "><a href=\"#" + thisId + "\">";
+                if (title.startsWith("FT:")) {
+                    tabs["FT"] += tab + title.slice(3) + "</a>";
+                } else if (title.startsWith("LF:")) {
+                    tabs["LF"] += tab + title.slice(3) + "</a>";
+                } else if (title.startsWith("NFT:")) {
+                    tabs["NFT"] += tab + title.slice(4) + "</a>";
+                } else if (!isInBlacklist(title)) {
+                    tabs["?"] += tab + title + "</a>";
                 }
-                if ($parent) {
-                    $parent.append("<li " + (thisId == worksheetId ? "class=\"current\"" : '') + "><a href=\"#" + thisId + "\">" + title.slice(3) +"</a></li>");
-                }
+            });
+            Object.keys(tabs).forEach(function(i) {
+                if (tabs[i]) $("nav > ul").append("<li><abbr title=\"" + TAB_NAMES[i] + "\">" + i + "</abbr><ul>" + tabs[i] + "</ul>");
             });
             // make each button reload the page on click
             $("nav a").each(function() {
@@ -595,7 +604,7 @@ function displayPokemon(){
             // Nature
             row += "<td class=\"nature " + pokemon.nature.toLowerCase() + "\">" + pokemon.nature + "</td>";
             // Ability
-            row += "<td class=\"ability\">" + pokemon.ability + "</td>";
+            row += "<td class=\"ability\">" + (pokemon.ability.endsWith('*') ? pokemon.ability.slice(0,-1) : pokemon.ability) + "</td>";
             // IVs & EVs
             var statAttribute;
             for (i = 0; i < BATTLE_STATS.length; i++) {
@@ -709,7 +718,8 @@ function displayPokemon(){
                 $pokemonInfo.find(".trainer").next().text($this.data("ot") + " (" + $this.data("tid") + ")");
                 // Nature & Ability
                 $pokemonInfo.find(".nature").next().text($this.data("nature"));
-                $pokemonInfo.find(".ability").next().text($this.data("ability"));
+                var ability = $this.data("ability");
+                $pokemonInfo.find(".ability").next().text(ability.endsWith('*') ? ability.slice(0,-1) : ability);
                 // Language
                 var language = $this.data("language");
                 $pokemonInfo.find(".language").text(language).attr("title", LANGUAGES[language]);
@@ -761,6 +771,7 @@ function displayPokemon(){
         onChange: filterPokemon,
         onSelectAll: filterPokemon
     });
+    $("#search-bar").on("input", filterPokemon);
     $("select:not(#misc-filter)").multiselect("selectAll", false);
     $("select").multiselect('updateButtonText');
 }
